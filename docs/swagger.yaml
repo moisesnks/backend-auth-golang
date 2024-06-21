@@ -1,0 +1,160 @@
+definitions:
+  controllers.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  controllers.LoginData:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  controllers.LoginResponse:
+    properties:
+      token:
+        description: Ejemplo de token JWT
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  controllers.RegisterData:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  controllers.RegisterResponse:
+    properties:
+      email:
+        type: string
+      message:
+        type: string
+      uid:
+        type: string
+    type: object
+  controllers.VerifyCodeRequest:
+    properties:
+      uid:
+        type: string
+      verificationCode:
+        type: string
+    type: object
+  controllers.VerifyCodeResponse:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Inicia sesión utilizando Firebase Authentication
+      parameters:
+      - description: Datos de inicio de sesión
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Inicio de sesión exitoso
+          schema:
+            $ref: '#/definitions/controllers.LoginResponse'
+        "400":
+          description: Datos de solicitud inválidos o errores en la solicitud
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "401":
+          description: Credenciales incorrectas
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Inicia sesión de usuario
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registra un nuevo usuario utilizando Firebase Authentication y
+        envía un correo de verificación.
+      parameters:
+      - description: Datos de registro del usuario
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.RegisterData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Respuesta exitosa al registrar usuario
+          schema:
+            $ref: '#/definitions/controllers.RegisterResponse'
+        "400":
+          description: Datos de solicitud inválidos
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "401":
+          description: El correo electrónico ya está en uso
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Registrar usuario
+      tags:
+      - auth
+  /verify:
+    post:
+      consumes:
+      - application/json
+      description: Verifica el código de verificación de un usuario en Firestore y
+        Firebase Auth.
+      parameters:
+      - description: Datos de la solicitud
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.VerifyCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Respuesta exitosa al verificar el código
+          schema:
+            $ref: '#/definitions/controllers.VerifyCodeResponse'
+        "400":
+          description: Datos de solicitud inválidos
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "401":
+          description: Código de verificación incorrecto
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Verifica el código de verificación de un usuario.
+      tags:
+      - auth
+swagger: "2.0"
