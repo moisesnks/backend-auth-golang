@@ -35,7 +35,7 @@ Se requiere la implementación de un microservicio de autenticación que soporte
    - Permitir a los usuarios autenticados actualizar su información personal en Firestore.
    - Asegurar que solo el usuario autenticado pueda actualizar su propia información.
 
-- [ ] **/uploadPhoto** - Handler para la carga de fotos de perfil del usuario:
+- [x] **/uploadPhoto** - Handler para la carga de fotos de perfil del usuario:
    - Permitir a los usuarios autenticados cargar y actualizar su foto de perfil en Firebase Storage.
    - Asegurar que solo el usuario autenticado pueda cargar y actualizar su propia foto de perfil.
 
@@ -63,6 +63,7 @@ Se requiere la implementación de un microservicio de autenticación que soporte
 - Por lo anterior comentado, agregué otra ruta y controlador, `change-password` que a través del token en el header permite cambiar la contraseña a un `uid`. En el body necesita la password. El UID lo identifica a través del token que le mandó. *(21-06-2024)*
 - Añadí la ruta `validateToken` que a través de una solicitud que llega del cliente con el header `Bearer {token}` le devuelve la información contenida en el JWT. *(21-06-2024)*
 - Sólo queda subir la foto al storage de GCP a través de una solicitud POST. *(21-06-2024)*
+- Terminé la ruta de upload-photo, funciona correctamente y redimensiona la foto a 200x200, además procura una foto por usuario. *(21-06-2024)*
 ### Observación 
 _Con lo que llevo, el equipo de infraestructura ya podría deployar este microservicio. Durante el sprint, continuaré con el CI/CD para completarlo. Esto permitirá que el equipo de frontend y QA participen en las integraciones en el cliente y en las pruebas de calidad. Por favor, contáctense conmigo en mleiva@utem.cl para enviarles las variables de entorno necesarias en caso de deploy en infraestructura, y para conocer más sobre el código y su integración en el frontend._
 

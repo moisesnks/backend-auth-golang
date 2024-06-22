@@ -8,19 +8,11 @@ import (
 	"net/http"
 	"os"
 
+	"backend/api/httputil"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
-
-// LoginResponse representa la estructura de la respuesta exitosa
-type LoginResponse struct {
-	Token string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."` // Ejemplo de token JWT
-}
-
-// ErrorResponse representa la estructura de la respuesta de error
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
 
 // Variables globales
 var (
@@ -44,8 +36,8 @@ func init() {
 
 }
 
-// LoginData representa los datos de inicio de sesión del usuario
-type LoginData struct {
+// LoginRequest representa los datos de inicio de sesión del usuario
+type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -56,16 +48,16 @@ type LoginData struct {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param email body LoginData true "Datos de inicio de sesión"
-// @Success 200 {object} LoginResponse "Inicio de sesión exitoso"
-// @Failure 400 {object} ErrorResponse "Datos de solicitud inválidos o errores en la solicitud"
-// @Failure 401 {object} ErrorResponse "Credenciales incorrectas"
-// @Failure 500 {object} ErrorResponse "Error interno del servidor"
+// @Param email body LoginRequest true "Datos de inicio de sesión"
+// @Success 200 {object} httputil.StandardResponse "Inicio de sesión exitoso"
+// @Failure 400 {object} httputil.ErrorResponse "Datos de solicitud inválidos o errores en la solicitud"
+// @Failure 401 {object} httputil.ErrorResponse "Credenciales incorrectas"
+// @Failure 500 {object} httputil.ErrorResponse "Error interno del servidor"
 // @Router /login [post]
 func LoginUser(c *gin.Context) {
-	var loginData LoginData
+	var loginData LoginRequest
 	if err := c.BindJSON(&loginData); err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Message: "Datos de solicitud inválidos"})
+		c.JSON(http.StatusBadRequest, httputil.ErrorResponse{Message: "Datos de solicitud inválidos"})
 		return
 	}
 
@@ -77,7 +69,7 @@ func LoginUser(c *gin.Context) {
 
 	requestBody, err := json.Marshal(requestData)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Message: "Error interno del servidor"})
+		c.JSON(http.StatusInternalServerError, httputil.ErrorResponse{Message: "Error interno del servidor"})
 		return
 	}
 
@@ -86,7 +78,7 @@ func LoginUser(c *gin.Context) {
 	resp, err := http.Post(firebaseAPIURL, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		log.Printf("Error al realizar la solicitud a Firebase: %v", err)
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Message: "Error al comunicarse con Firebase"})
+		c.JSON(http.StatusInternalServerError, httputil.ErrorResponse{Message: "Error al comunicarse con Firebase"})
 		return
 	}
 	defer resp.Body.Close()
@@ -94,7 +86,7 @@ func LoginUser(c *gin.Context) {
 	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		log.Printf("Error al decodificar la respuesta de Firebase: %v", err)
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Message: "Error al procesar la respuesta de Firebase"})
+		c.JSON(http.StatusInternalServerError, httputil.ErrorResponse{Message: "Error al procesar la respuesta de Firebase"})
 		return
 	}
 
@@ -102,17 +94,18 @@ func LoginUser(c *gin.Context) {
 		errorMessage := errMsg["message"].(string)
 		switch errorMessage {
 		case "EMAIL_NOT_FOUND":
-			c.JSON(http.StatusNotFound, ErrorResponse{Message: "Usuario no encontrado"})
+			c.JSON(http.StatusNotFound, httputil.ErrorResponse{Message: "Usuario no encontrado"})
 		case "INVALID_PASSWORD":
-			c.JSON(http.StatusUnauthorized, ErrorResponse{Message: "Contraseña incorrecta"})
+			c.JSON(http.StatusUnauthorized, httputil.ErrorResponse{Message: "Contraseña incorrecta"})
 		default:
-			c.JSON(http.StatusBadRequest, ErrorResponse{Message: errorMessage})
+			c.JSON(http.StatusBadRequest, httputil.ErrorResponse{Message: errorMessage})
 		}
 		return
 	}
 
-	response := LoginResponse{
-		Token: result["idToken"].(string),
+	response := httputil.StandardResponse{
+		Message: "Inicio de sesión exitoso",
+		Data:    map[string]string{"token": result["idToken"].(string)},
 	}
 	c.JSON(http.StatusOK, response)
 }

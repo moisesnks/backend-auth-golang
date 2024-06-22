@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"cloud.google.com/go/storage"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
 	"github.com/gin-contrib/cors"
@@ -23,8 +24,18 @@ import (
 var (
 	firestoreClient *firestore.Client
 	authClient      *auth.Client
+	storageClient   *storage.Client
 )
 
+// @title Backend API
+// @version 1.0
+// @description API para el backend de una aplicación web con autenticación de Firebase.
+// @contact.name moisesnks
+// @contact.url https://github.com/moisesnks
+// @contact.email moisesnks@utem.cl
+// @BasePath /
+// @host localhost:8081
+// @schemes http
 func main() {
 	// Cargar variables de entorno desde el archivo .env
 	err := godotenv.Load()
@@ -42,6 +53,12 @@ func main() {
 		log.Fatalf("Error inicializando app de Firebase: %v", err)
 	}
 
+	// Inicializar Firebase
+	// app, err := firebase.NewApp(context.Background(), nil)
+	// if err != nil {
+	// 	log.Fatalf("error initializing app: %v\n", err)
+	// }
+
 	// Inicializar cliente de Firestore
 	firestoreClient, err = app.Firestore(context.Background())
 	if err != nil {
@@ -52,6 +69,12 @@ func main() {
 	authClient, err = app.Auth(context.Background())
 	if err != nil {
 		log.Fatalf("Error inicializando cliente de Auth de Firebase: %v", err)
+	}
+
+	// Inicializar cliente de almacenamiento en la nube (Google Cloud Storage)
+	storageClient, err = storage.NewClient(context.Background())
+	if err != nil {
+		log.Fatalf("Error inicializando cliente de almacenamiento en la nube: %v", err)
 	}
 
 	// Cerrar cliente de Firestore al finalizar la aplicación
@@ -80,10 +103,10 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Configurar rutas desde el paquete de autenticación (api)
-	api.SetupRouter(r, firestoreClient, authClient)
+	api.SetupRouter(r, firestoreClient, authClient, storageClient)
 
 	// Iniciar el servidor solo después de la inicialización completa
-	port := "8080"
+	port := "8081"
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
