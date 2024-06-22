@@ -10,7 +10,7 @@ Se requiere la implementación de un microservicio de autenticación que soporte
 4. **/forgotPassword** - Recuperación de contraseña.
 5. **/updateUser** - Actualización de información del usuario.
 6. **/uploadPhoto** - Carga de fotos de perfil del usuario.
-7. **/validateToken** - Validación de tokens de autenticación y devolución de la información del JWT.
+7. **/validateToken** - Validación de tokens de autenticación y devolución de la información del JWT
 
 ## Requisitos
 - [x] **/login** - Handler para el inicio de sesión de usuarios:
