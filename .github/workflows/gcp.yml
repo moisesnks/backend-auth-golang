@@ -1,7 +1,7 @@
 name: Build and Push Go Image to Google Cloud Platform
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 env:
   IMAGE_TAG: ${{ github.sha }}
