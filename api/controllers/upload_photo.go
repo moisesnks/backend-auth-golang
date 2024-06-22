@@ -34,7 +34,7 @@ import (
 // @Failure 401 {object} httputil.ErrorResponse "No autorizado"
 // @Failure 500 {object} httputil.ErrorResponse "Error al cargar la foto de perfil"
 // @Router /upload-photo [post]
-func UploadPhoto(c *gin.Context, firestoreClient *firestore.Client, storageClient *storage.Client) {
+func UploadPhoto(c *gin.Context, firestoreClient *firestore.Client, storageClient *storage.Client, authClient *auth.Client) {
 	// Verificar si se ha enviado un archivo
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -128,13 +128,32 @@ func UploadPhoto(c *gin.Context, firestoreClient *firestore.Client, storageClien
 	_, err = firestoreClient.Collection("users").Doc(uid).Set(context.Background(), map[string]interface{}{
 		"photoURL": url,
 	}, firestore.MergeAll)
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al cargar la foto de perfil"})
 		return
 	}
+	// Actualizar el perfil del usuario en Firebase Authentication con la URL de la foto de perfil
+	_, err = authClient.UpdateUser(context.Background(), uid, (&auth.UserToUpdate{}).PhotoURL(url))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, httputil.ErrorResponse{Message: "Error al actualizar la foto de perfil"})
+		return
+	} else {
+		log.Printf("Foto de perfil actualizada para el usuario %s", uid)
+	}
 
-	c.JSON(http.StatusOK, httputil.StandardResponse{Message: "Foto de perfil cargada correctamente", Data: map[string]string{"photoURL": url}})
+	// Crear un token renovado con la URL de la foto de perfil
+	// para que el cliente pueda actualizar la foto de perfil en la caché
+	// sin necesidad de volver a iniciar sesión
+	userClaims, error := GetUserInfo(authClient, uid)
+	if error != nil {
+		c.JSON(http.StatusInternalServerError, httputil.ErrorResponse{Message: "Error al obtener información del usuario"})
+		return
+	}
+
+	c.JSON(http.StatusOK, httputil.StandardResponse{
+		Message: "Foto de perfil cargada correctamente",
+		Data:    userClaims,
+	})
 }
 
 // deleteAllFromCloudStorage elimina todos los archivos de la carpeta del usuario en el almacenamiento en la nube.

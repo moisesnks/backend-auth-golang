@@ -31,13 +31,16 @@ func SetupRouter(r *gin.Engine, firestoreClient *firestore.Client, authClient *a
 			controllers.UpdateProfile(c, firestoreClient, authClient)
 		})
 		authRoutes.POST("/upload-photo", middleware.AuthMiddleware(authClient), func(c *gin.Context) {
-			controllers.UploadPhoto(c, firestoreClient, storageClient)
+			controllers.UploadPhoto(c, firestoreClient, storageClient, authClient)
 		})
 		authRoutes.POST("/forgot-password", func(c *gin.Context) {
 			controllers.ForgotPassword(c, authClient, firestoreClient)
 		})
 		authRoutes.POST("/change-password", middleware.JWTMiddleware(), func(c *gin.Context) {
 			controllers.ChangePassword(c, authClient)
+		})
+		authRoutes.GET("/validate-token", middleware.AuthMiddleware(authClient), func(c *gin.Context) {
+			controllers.ValidateToken(c, authClient)
 		})
 	}
 }
