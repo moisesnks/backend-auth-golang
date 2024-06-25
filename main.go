@@ -44,7 +44,7 @@ func main() {
 	}
 
 	// Obtener SERVICE_ACCOUNT_KEY de las variables de entorno que es un string without line breaks
-	serviceAccountKey := os.Getenv("SERVICE_ACCOUNT_KEY")
+	serviceAccountKey := os.Getenv("SERVICE_ACCOUNT_KEY_ENV")
 
 	// Inicializar Firebase
 	opt := option.WithCredentialsJSON([]byte(serviceAccountKey))
