@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -106,6 +107,25 @@ func main() {
 
 	// Configurar Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Servir un HTML básico en la raíz
+	r.GET("/", func(c *gin.Context) {
+		htmlContent := `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Backend API</title>
+        </head>
+        <body>
+            <h1>Backend API</h1>
+            <p>Bienvenido a la API de backend.</p>
+            <p>Puedes acceder a la documentación de la API con Swagger <a href="/swagger/index.html">aquí</a>.</p>
+        </body>
+        </html>
+    `
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.String(http.StatusOK, htmlContent)
+	}) // Fin de la ruta raíz
 
 	// Configurar rutas desde el paquete de autenticación (api)
 	api.SetupRouter(r, firestoreClient, authClient, storageClient)
