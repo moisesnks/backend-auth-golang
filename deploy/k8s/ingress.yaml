@@ -14,7 +14,7 @@ spec:
       paths:
       - backend:
           service:
-            name: backend-autch
+            name: backend-auth-svc
             port:
               number: 80
         pathType: Prefix
