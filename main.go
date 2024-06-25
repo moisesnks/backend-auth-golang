@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -37,17 +38,27 @@ var (
 // @host localhost:8081
 // @schemes http
 func main() {
-	// Cargar variables de entorno desde el archivo .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error cargando archivo .env: %v", err)
+	// Cargar variables de entorno desde el archivo .env si está en desarrollo
+	isDev := os.Getenv("ENV") == "dev"
+	if isDev {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatalf("Error cargando archivo .env: %v", err)
+		}
 	}
 
-	// Obtener SERVICE_ACCOUNT_KEY de las variables de entorno que es un string without line breaks
-	serviceAccountKey := os.Getenv("SERVICE_ACCOUNT_KEY_ENV")
+	var opt option.ClientOption
+	if isDev {
+		// Obtener SERVICE_ACCOUNT_KEY de las variables de entorno que es un string sin saltos de línea
+		serviceAccountKey := os.Getenv("SERVICE_ACCOUNT_KEY_ENV")
+		fmt.Println(serviceAccountKey)
+		opt = option.WithCredentialsJSON([]byte(serviceAccountKey))
+	} else {
+		// En GCP, usa las credenciales predeterminadas
+		opt = option.WithCredentialsFile(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+	}
 
 	// Inicializar Firebase
-	opt := option.WithCredentialsJSON([]byte(serviceAccountKey))
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Fatalf("Error inicializando app de Firebase: %v", err)
