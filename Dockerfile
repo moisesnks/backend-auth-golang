@@ -5,7 +5,10 @@ WORKDIR /app
 COPY . .
 RUN go mod download
 
-COPY *go .
-RUN go build -o app 
+COPY *.go .
+RUN go build -o app
+
+# Exponer el puerto 8081
+EXPOSE 8081
 
 ENTRYPOINT [ "./app" ]

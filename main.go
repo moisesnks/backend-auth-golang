@@ -53,12 +53,6 @@ func main() {
 		log.Fatalf("Error inicializando app de Firebase: %v", err)
 	}
 
-	// Inicializar Firebase
-	// app, err := firebase.NewApp(context.Background(), nil)
-	// if err != nil {
-	// 	log.Fatalf("error initializing app: %v\n", err)
-	// }
-
 	// Inicializar cliente de Firestore
 	firestoreClient, err = app.Firestore(context.Background())
 	if err != nil {
@@ -71,8 +65,8 @@ func main() {
 		log.Fatalf("Error inicializando cliente de Auth de Firebase: %v", err)
 	}
 
-	// Inicializar cliente de almacenamiento en la nube (Google Cloud Storage)
-	storageClient, err = storage.NewClient(context.Background())
+	// Inicializar cliente de almacenamiento en la nube (Google Cloud Storage) usando las mismas credenciales
+	storageClient, err = storage.NewClient(context.Background(), opt)
 	if err != nil {
 		log.Fatalf("Error inicializando cliente de almacenamiento en la nube: %v", err)
 	}
