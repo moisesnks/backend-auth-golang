@@ -17,6 +17,12 @@ spec:
         image: {IMAGE_TAG}
         ports:
         - containerPort: 8081
+        env:
+        - name: FIREBASE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: backend-auth-secret
+              key: FIREBASE_API_KEY
         resources:
           # You must specify requests for CPU to autoscale
           # based on CPU utilization
