@@ -36,7 +36,7 @@ var (
 // @contact.url https://github.com/moisesnks
 // @contact.email moisesnks@utem.cl
 // @BasePath /
-// @host localhost:8081
+// @host https://backend-autch.tssw.cl
 // @schemes http
 func main() {
 	// Cargar variables de entorno desde el archivo .env si está en desarrollo
