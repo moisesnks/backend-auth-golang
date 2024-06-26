@@ -601,9 +601,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "https://backend-autch.tssw.cl",
+	Host:             "backend-autch.tssw.cl",
 	BasePath:         "/",
-	Schemes:          []string{"http"},
+	Schemes:          []string{"https"},
 	Title:            "Backend API",
 	Description:      "API para el backend de una aplicación web con autenticación de Firebase.",
 	InfoInstanceName: "swagger",

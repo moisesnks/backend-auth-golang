@@ -55,7 +55,7 @@ definitions:
       message:
         type: string
     type: object
-host: https://backend-autch.tssw.cl
+host: backend-autch.tssw.cl
 info:
   contact:
     email: moisesnks@utem.cl
@@ -393,5 +393,5 @@ paths:
       tags:
       - auth
 schemes:
-- http
+- https
 swagger: "2.0"

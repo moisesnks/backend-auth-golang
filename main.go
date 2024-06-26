@@ -36,8 +36,8 @@ var (
 // @contact.url https://github.com/moisesnks
 // @contact.email moisesnks@utem.cl
 // @BasePath /
-// @host https://backend-autch.tssw.cl
-// @schemes http
+// @host backend-autch.tssw.cl
+// @schemes https
 func main() {
 	// Cargar variables de entorno desde el archivo .env si está en desarrollo
 	isDev := os.Getenv("ENV") == "dev"

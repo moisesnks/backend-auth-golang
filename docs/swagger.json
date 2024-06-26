@@ -1,6 +1,6 @@
 {
     "schemes": [
-        "http"
+        "https"
     ],
     "swagger": "2.0",
     "info": {
@@ -13,7 +13,7 @@
         },
         "version": "1.0"
     },
-    "host": "https://backend-autch.tssw.cl",
+    "host": "backend-autch.tssw.cl",
     "basePath": "/",
     "paths": {
         "/change-password": {
