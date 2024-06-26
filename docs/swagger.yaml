@@ -55,7 +55,7 @@ definitions:
       message:
         type: string
     type: object
-host: localhost:8081
+host: https://backend-autch.tssw.cl
 info:
   contact:
     email: moisesnks@utem.cl

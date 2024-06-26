@@ -13,7 +13,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8081",
+    "host": "https://backend-autch.tssw.cl",
     "basePath": "/",
     "paths": {
         "/change-password": {
