@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-auth
+  template:
+    metadata:
+      labels:
+        app: backend-auth
+    spec:
+      containers:
+      - name: backend-auth
+        image: {IMAGE_TAG}
+        ports:
+        - containerPort: 8081
+        env:
+        - name: FIREBASE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: backend-auth-secret
+              key: FIREBASE_API_KEY
+        resources:
+          # You must specify requests for CPU to autoscale
+          # based on CPU utilization
+          limits:
+            cpu: 50m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi

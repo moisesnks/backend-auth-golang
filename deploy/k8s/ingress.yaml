@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-autch-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: "true"
+spec: 
+  rules:
+  - host: backend-autch.tssw.cl
+    http:
+      paths:
+      - backend:
+          service:
+            name: backend-auth-svc
+            port:
+              number: 80
+        pathType: Prefix
+        path: /
+  tls:
+  - hosts:
+    - backend-autch.tssw.cl
+    secretName: backend-autch-ingress-secret

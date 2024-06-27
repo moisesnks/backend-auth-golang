@@ -1,0 +1,397 @@
+basePath: /
+definitions:
+  controllers.ChangePasswordRequest:
+    properties:
+      password:
+        type: string
+    required:
+    - password
+    type: object
+  controllers.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  controllers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  controllers.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  controllers.UpdateProfileRequest:
+    properties:
+      birthdate:
+        type: string
+      displayName:
+        type: string
+      rut:
+        type: string
+    type: object
+  controllers.VerifyCodeRequest:
+    properties:
+      uid:
+        type: string
+      verificationCode:
+        type: string
+    type: object
+  httputil.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  httputil.StandardResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+host: backend-autch.tssw.cl
+info:
+  contact:
+    email: moisesnks@utem.cl
+    name: moisesnks
+    url: https://github.com/moisesnks
+  description: API para el backend de una aplicación web con autenticación de Firebase.
+  title: Backend API
+  version: "1.0"
+paths:
+  /change-password:
+    post:
+      consumes:
+      - application/json
+      description: Actualiza la contraseña del usuario autenticado usando Firebase
+        Authentication.
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Nueva contraseña del usuario
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contraseña actualizada correctamente
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: Datos de solicitud inválidos
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "401":
+          description: Token de autenticación no proporcionado o inválido
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "403":
+          description: Token de autenticación expirado
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      security:
+      - BearerToken: []
+      summary: Actualizar contraseña
+      tags:
+      - auth
+  /forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Envía un correo electrónico para restablecer la contraseña si el
+        usuario existe en Firebase Authentication.
+      parameters:
+      - description: Correo electrónico del usuario
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Correo de restablecimiento de contraseña enviado
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: Datos de solicitud inválidos
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Restablecer contraseña
+      tags:
+      - auth
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Inicia sesión utilizando Firebase Authentication
+      parameters:
+      - description: Datos de inicio de sesión
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Inicio de sesión exitoso
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: Datos de solicitud inválidos o errores en la solicitud
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "401":
+          description: Credenciales incorrectas
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Inicia sesión de usuario
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registra un nuevo usuario utilizando Firebase Authentication y
+        envía un correo de verificación.
+      parameters:
+      - description: Datos de registro del usuario
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Respuesta exitosa al registrar usuario
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: Datos de solicitud inválidos
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "401":
+          description: El correo electrónico ya está en uso
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Registrar usuario
+      tags:
+      - auth
+  /resend-code:
+    post:
+      consumes:
+      - application/json
+      description: Reenvía el código de verificación al usuario si el código anterior
+        ha expirado.
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Respuesta exitosa al reenviar código de verificación
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: El usuario ya está verificado o el código de verificación aún
+            es válido
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "401":
+          description: Usuario no autorizado
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Reenviar código de verificación
+      tags:
+      - auth
+  /update:
+    patch:
+      consumes:
+      - application/json
+      description: Actualiza el displayName en Firebase Auth y los campos rut y birthdate
+        en Firestore
+      parameters:
+      - description: Token de autorización JWT
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Datos de actualización del perfil
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Perfil actualizado exitosamente
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: Datos de solicitud inválidos
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "401":
+          description: Usuario no autorizado
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Actualiza el perfil de usuario
+      tags:
+      - profile
+  /upload-photo:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Cargar una foto de perfil para el usuario actual.
+      parameters:
+      - description: Token de autorización JWT
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Archivo de imagen
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Foto de perfil cargada correctamente
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: No se ha enviado ningún archivo
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "401":
+          description: No autorizado
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error al cargar la foto de perfil
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Cargar foto de perfil
+      tags:
+      - profile
+  /validate-token:
+    get:
+      consumes:
+      - application/json
+      description: Valida un token de usuario y devuelve la información que contiene
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Respuesta exitosa al validar token de usuario
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "401":
+          description: Usuario no autorizado
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Validar token de usuario
+      tags:
+      - auth
+  /verify-code:
+    post:
+      consumes:
+      - application/json
+      description: Verifica el código de verificación de un usuario en Firestore y
+        Firebase Auth.
+      parameters:
+      - description: Datos de la solicitud
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.VerifyCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuario verificado
+          schema:
+            $ref: '#/definitions/httputil.StandardResponse'
+        "400":
+          description: Datos de solicitud inválidos
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "401":
+          description: Código de verificación incorrecto
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/httputil.ErrorResponse'
+      summary: Verifica el código de verificación de un usuario.
+      tags:
+      - auth
+schemes:
+- https
+swagger: "2.0"
