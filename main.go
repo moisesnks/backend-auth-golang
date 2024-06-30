@@ -78,7 +78,7 @@ func main() {
 	}
 
 	// Inicializar cliente de almacenamiento en la nube (Google Cloud Storage) usando las mismas credenciales
-	storageClient, err = storage.NewClient(context.Background(), opt)
+	storageClient, err = storage.NewClient(context.Background())
 	if err != nil {
 		log.Fatalf("Error inicializando cliente de almacenamiento en la nube: %v", err)
 	}
@@ -110,22 +110,8 @@ func main() {
 
 	// Redireccionar la raíz a la documentación de Swagger
 	r.GET("/", func(c *gin.Context) {
-		htmlContent := `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Backend API</title>
-        </head>
-        <body>
-            <h1>Backend API</h1>
-            <p>Bienvenido a la API de backend.</p>
-            <p>Puedes acceder a la documentación de la API con Swagger <a href="/swagger/index.html">aquí</a>.</p>
-        </body>
-        </html>
-    `
-		c.Header("Content-Type", "text/html; charset=utf-8")
-		c.String(http.StatusOK, htmlContent)
-	}) // Fin de la ruta raíz
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
 
 	// Configurar rutas desde el paquete de autenticación (api)
 	api.SetupRouter(r, firestoreClient, authClient, storageClient)

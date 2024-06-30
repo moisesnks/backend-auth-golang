@@ -408,44 +408,6 @@
                 }
             }
         },
-        "/validate-token": {
-            "get": {
-                "description": "Valida un token de usuario y devuelve la información que contiene",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Validar token de usuario",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Respuesta exitosa al validar token de usuario",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.StandardResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Usuario no autorizado",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/verify-code": {
             "post": {
                 "description": "Verifica el código de verificación de un usuario en Firestore y Firebase Auth.",

@@ -328,31 +328,6 @@ paths:
       summary: Cargar foto de perfil
       tags:
       - profile
-  /validate-token:
-    get:
-      consumes:
-      - application/json
-      description: Valida un token de usuario y devuelve la información que contiene
-      parameters:
-      - description: Bearer token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Respuesta exitosa al validar token de usuario
-          schema:
-            $ref: '#/definitions/httputil.StandardResponse'
-        "401":
-          description: Usuario no autorizado
-          schema:
-            $ref: '#/definitions/httputil.ErrorResponse'
-      summary: Validar token de usuario
-      tags:
-      - auth
   /verify-code:
     post:
       consumes:

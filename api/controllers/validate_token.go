@@ -9,20 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ValidateToken devuelve la información que hay en el token que ya pasó el middleware de autenticación
-//
-// Este endpoint permite validar un token de usuario y obtener la información que contiene.
-// Se espera que el usuario esté autenticado mediante un token de sesión válido en el encabezado de la solicitud.
-//
-// @Summary Validar token de usuario
-// @Description Valida un token de usuario y devuelve la información que contiene
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param Authorization header string true "Bearer token"
-// @Success 200 {object} httputil.StandardResponse "Respuesta exitosa al validar token de usuario"
-// @Failure 401 {object} httputil.ErrorResponse "Usuario no autorizado"
-// @Router /validate-token [get]
 // ValidateToken verifica y devuelve la información del token validado.
 func ValidateToken(c *gin.Context, authClient *auth.Client) {
 	// Obtener el token de usuario del contexto
@@ -39,24 +25,30 @@ func ValidateToken(c *gin.Context, authClient *auth.Client) {
 		return
 	}
 
-	// Construir el objeto de usuario desde el token decodificado
-	user := gin.H{
-		"uid":           authTok.UID,
-		"email":         authTok.Claims["email"],
-		"role":          authTok.Claims["role"],
-		"emailVerified": authTok.Claims["email_verified"],
-		"displayName":   authTok.Claims["name"],
-		"photoURL":      authTok.Claims["picture"],
+	// Obtener la información del usuario desde Firebase Authentication usando el uid
+	userInfo, err := GetUserInfo(authClient, authTok.UID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, httputil.ErrorResponse{Message: "Error al obtener información del usuario"})
+		return
+	}
+
+	// Actualizar los claims del token si es necesario
+	if needToUpdateClaims(authTok.Claims, userInfo) {
+		err := updateClaims(authClient, authTok.UID, userInfo)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, httputil.ErrorResponse{Message: "Error al actualizar los claims"})
+			return
+		}
 	}
 
 	// Enviar la respuesta con el usuario válido
 	c.JSON(http.StatusOK, httputil.StandardResponse{
 		Message: "Token válido",
-		Data:    user,
+		Data:    userInfo,
 	})
 }
 
-// la misma función pero útil para que otras funciones la llamen
+// GetUserInfo obtiene la información del usuario desde Firebase Authentication usando el uid.
 func GetUserInfo(authClient *auth.Client, uid string) (map[string]interface{}, error) {
 	// Obtener el usuario desde Firebase Authentication
 	user, err := authClient.GetUser(context.Background(), uid)
@@ -75,4 +67,18 @@ func GetUserInfo(authClient *auth.Client, uid string) (map[string]interface{}, e
 	}
 
 	return userInfo, nil
+}
+
+// needToUpdateClaims determina si es necesario actualizar los claims del token.
+func needToUpdateClaims(claims map[string]interface{}, userInfo map[string]interface{}) bool {
+	return claims["name"] != userInfo["displayName"] || claims["picture"] != userInfo["photoURL"]
+}
+
+// updateClaims actualiza los claims del token de usuario.
+func updateClaims(authClient *auth.Client, uid string, userInfo map[string]interface{}) error {
+	claims := map[string]interface{}{
+		"name":    userInfo["displayName"],
+		"picture": userInfo["photoURL"],
+	}
+	return authClient.SetCustomUserClaims(context.Background(), uid, claims)
 }
