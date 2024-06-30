@@ -108,7 +108,7 @@ func main() {
 	// Configurar Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Servir un HTML básico en la raíz
+	// Redireccionar la raíz a la documentación de Swagger
 	r.GET("/", func(c *gin.Context) {
 		htmlContent := `
         <!DOCTYPE html>
