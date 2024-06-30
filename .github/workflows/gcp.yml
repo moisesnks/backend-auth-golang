@@ -1,0 +1,83 @@
+name: Build and Push Go Image to Google Cloud Platform
+on:
+  push:
+    branches: [master]
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-push-gcr:
+    name: Build and Push to GCP
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Create .env file
+      run: |
+        echo "FIREBASE_SERVICE_ACCOUNT_KEY=$(echo '${{ secrets.SERVICE_ACCOUNT_KEY_ENV }}' | base64 --decode)" >> .env
+        echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> .env
+        echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+        echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+        echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
+        echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+        echo "URL_FRONTEND=${{ secrets.URL_FRONTEND }}" >> .env
+        echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> .env
+      working-directory: ${{ github.workspace }}
+
+    - name: Authenticate with gcloud CLI
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
+    - name: Setup gcloud CLI
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.PROJECT_ID }}
+
+    - name: Login to GAR
+      uses: docker/login-action@v3
+      with:
+          registry: ${{ secrets.GKE_ZONE }}-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
+    - name: Build Docker Image
+      run: docker build -t ${{ secrets.REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/images/${{ secrets.IMAGE_NAME }}:${{ github.sha }} .
+
+  
+    - name: Configure Docker Client
+      run: |-
+        gcloud auth configure-docker --quiet
+        gcloud auth configure-docker ${{ secrets.REGISTRY_URL }} --quiet
+
+    - name: Push Docker Image to Artifact Registry
+      run: |
+          docker push ${{ secrets.REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/images/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
+          
+    - name: Install Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0.2.0
+      with:
+          version: 'latest'
+          project_id: ${{ secrets.PROJECT_ID }}
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
+    - name: Install gke-gcloud-auth-plugin
+      run: gcloud components install gke-gcloud-auth-plugin
+      
+    - name: Get GKE Credentials
+      run: |-
+        gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.PROJECT_ID }}
+
+    - name: Set Image Deployment YAML
+      run: sed -i "s~{IMAGE_TAG}~${{ secrets.REGISTRY_URL }}/${{ secrets.PROJECT_ID }}/images/${{ secrets.IMAGE_NAME }}:${{ github.sha }}~" deploy/k8s/deploy.yaml
+    
+    - name: Apply Kubernetes Deploy YAML
+      run: kubectl apply -f ./deploy/k8s/deploy.yaml
+
+    - name: Apply Kubernetes Ingress YAML
+      run: kubectl apply -f ./deploy/k8s/ingress.yaml
+
+    - name: Apply Kubernetes Services YAML
+      run: kubectl apply -f ./deploy/k8s/services.yaml
